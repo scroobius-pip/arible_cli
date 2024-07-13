@@ -1,14 +1,17 @@
 import { program } from 'commander';
-import ConfigStore from 'conf'
 
 import 'dotenv/config'
 
-import { getAppInput } from './app';
+import { createEmailToken, responseCallback, verifyEmailToken } from './api';
+import { delay, Listr } from 'listr2';
+import { DEFAULT_APP_DIR_PATH, jwtValid, Project } from './project';
+import { ListrEnquirerPromptAdapter } from '@listr2/prompt-adapter-enquirer';
 import { getClient } from './api/client';
-import { jwtDecode } from 'jwt-decode';
-import { createApp, ErrorType, responseCallback } from './api';
+import { title } from 'process';
 
-const showLoginPrompt = async (): Promise<string> => {
+
+
+export const showLoginPrompt = async (): Promise<string> => {
     //enter your email
     // POST: /auth/email?email=<EMAIL>
     //we've sent a verification token to your email
@@ -19,97 +22,88 @@ const showLoginPrompt = async (): Promise<string> => {
     return 'ß'
 }
 
-interface Store {
-    token?: string
-    appId?: string
+interface Ctx {
+    project: Project
+    email?: string
 }
-
-const DEFAULT_APP_DIR_PATH = "./arible_assets";
-class Project {
-    store: ConfigStore<Store>
-    constructor() {
-        const store = new ConfigStore<Store>({
-            projectName: 'arible',
-            cwd: './.arible',
-            configName: 'project'
-        })
-
-        this.store = store
-    }
-
-
-    public set token(v: string) {
-        this.store.set('token', v)
-    }
-
-    public set appId(appId: string) {
-        this.store.set('appId', appId)
-    }
-
-
-    public get token(): string | undefined {
-        const token = this.store.get('token')
-        if (token && jwtValid(token)) {
-            return token
-        }
-    }
-
-    public get appId(): string | undefined {
-        return this.store.get('appId')
-    }
-
-    public async login(): Promise<Project> {
-        const newAuthToken = await showLoginPrompt()
-        this.store.set('token', newAuthToken)
-        return this
-    }
-
-    public async requestAdminApproval() {
-        if (!this.appId) {
-            console.error('App Not Submitted, Submit this App, and then request approval')
-            process.exit()
-        }
-
-    }
-
-    public async submitApp(app_dir_path = DEFAULT_APP_DIR_PATH, visible = false) {
-        if (visible) {
-            console.info('This app would be immediately visible')
-        }
-
-        if (this.token) {
-            const client = getClient(this.token)
-            const appInput = await getAppInput(app_dir_path, client)
-            const result = await createApp(client, { ...appInput, visible }, this.appId)
-            responseCallback(result, (app) => {
-                this.appId = app.id
-            }, (error) => {
-                if (error === ErrorType.Auth) {
-                    (await this.login()).submitApp(app_dir_path, visible)
-                } else {
-                    console.error(error)
-                }
-            })
-        } else {
-            //you're not authenticated, we'll have to log you in.
-            (await this.login()).submitApp(app_dir_path, visible)
-        }
-    }
-}
-
-
-const jwtValid = (token: string): boolean {
-    const { exp } = jwtDecode(token)
-    const currentTime = new Date().getTime() / 1000
-    return !!exp && currentTime > exp
-}
-
-
-
 const entry = async () => {
-    const project = new Project()
-    const isVisible = false;
-    await project.submitApp(DEFAULT_APP_DIR_PATH, isVisible)
+
+    // const project = new Project()
+    // const isVisible = false;
+
+    const tasks = new Listr<Ctx>(
+        [
+            {
+                title: 'Checking existing project',
+                async task(ctx, task) {
+                    ctx.project = new Project()
+                }
+            },
+            {
+                title: 'Authenticating',
+                async task(ctx, task) {
+                    if (ctx.project.token) {
+                        task.skip("You're in.")
+                        return
+                    }
+
+                    return task.newListr([
+                        {
+                            title: `Send Verification Code`,
+                            async task(_, task) {
+                                const email = await task.prompt(ListrEnquirerPromptAdapter).run<string>({
+                                    type: 'Input',
+                                    message: "What's your email ?",
+                                    initial: "me@me.com",
+                                    required: true
+                                })
+                                const client = getClient()
+                                const { error } = await createEmailToken(client, email)
+                                if (error) {
+                                    throw new Error(error)
+                                }
+                                task.output = `Success: Check ${email} for a verification code`
+                                ctx.email = email
+                            },
+                            exitOnError: true,
+                            retry: 3
+                        },
+                        {
+                            title: `Verify Code`,
+
+                            async task(ctx, task) {
+                                if (!ctx.email) throw new Error('Email where art thou ?')
+                                const client = getClient()
+                                const token = await task.prompt(ListrEnquirerPromptAdapter).run<string>({
+                                    type: 'Password',
+                                    message: "What's the verification code ?",
+                                    required: true
+                                })
+                                const { data, error } = await verifyEmailToken(client, ctx.email, token)
+                                if (!data || error) {
+                                    throw new Error('Invalid verification code')
+                                }
+                                ctx.project.token = data
+                                task.output = `Login Success!`
+                                await delay(500)
+                            }
+                        }
+                    ], { concurrent: false })
+                }
+            },
+            {
+                async task(ctx, task) {
+                    task.title = ctx.project.appId ? 'Submitting App Update' : 'Creating App'
+                    const visible = false;
+                    // await ctx.project.submitApp(DEFAULT_APP_DIR_PATH, visible)
+                }
+            }
+        ],
+        { concurrent: false }
+    )
+
+    await tasks.run()
+
 }
 
 

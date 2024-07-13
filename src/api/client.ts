@@ -3,10 +3,10 @@ import fetch from 'node-fetch-native'
 
 const API_ENDPOINT = 'https://api.arible.co'
 
-export const getClient = (token: string): Client => {
+export const getClient = (token?: string): Client => {
     const headers = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
     }
 
     return async <T, U>(method: string, path: string, mapper?: ClientMapper<T, U>, body?: string) => {
