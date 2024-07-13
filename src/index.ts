@@ -1,26 +1,11 @@
-import { program } from 'commander';
-
 import 'dotenv/config'
-
 import { createEmailToken, responseCallback, verifyEmailToken } from './api';
 import { delay, Listr } from 'listr2';
 import { DEFAULT_APP_DIR_PATH, jwtValid, Project } from './project';
 import { ListrEnquirerPromptAdapter } from '@listr2/prompt-adapter-enquirer';
 import { getClient } from './api/client';
-import { title } from 'process';
+import { parseArgs } from 'util';
 
-
-
-export const showLoginPrompt = async (): Promise<string> => {
-    //enter your email
-    // POST: /auth/email?email=<EMAIL>
-    //we've sent a verification token to your email
-    //type your verification token here
-    /// POST /auth/verify?email=<EMAIL>&token=<TOKEN>
-    /// login successful
-    /// RETURN authorization from body
-    return 'ß'
-}
 
 interface Ctx {
     project: Project
@@ -30,6 +15,11 @@ const entry = async () => {
 
     // const project = new Project()
     // const isVisible = false;
+    const { positionals } = parseArgs({
+        allowPositionals: true,
+    })
+    const isVisible = positionals.includes('publish')
+    const requestAdmin = positionals.includes('approve')
 
     const tasks = new Listr<Ctx>(
         [
@@ -94,7 +84,13 @@ const entry = async () => {
             {
                 async task(ctx, task) {
                     task.title = ctx.project.appId ? 'Submitting App Update' : 'Creating App'
-                    const visible = false;
+
+                    if (!isVisible) {
+                        task.output = `App will not be accessible publicly, set it public with "arible publish"`
+                    }
+
+                    await delay(3000)
+
                     // await ctx.project.submitApp(DEFAULT_APP_DIR_PATH, visible)
                 }
             }
