@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import { createApp, createEmailToken, EAppInput, responseCallback, verifyEmailToken } from './api';
+import { createApp, createEmailToken, EAppInput, getMe, responseCallback, verifyEmailToken } from './api';
 import { delay, Listr, ListrDefaultRendererLogLevels } from 'listr2';
 import { DEFAULT_APP_DIR_PATH, jwtValid, Project } from './project';
 import { ListrEnquirerPromptAdapter } from '@listr2/prompt-adapter-enquirer';
@@ -25,23 +25,25 @@ const entry = async () => {
     const { positionals } = parseArgs({
         allowPositionals: true,
     })
-    const isVisible = positionals.includes('publish')
+    const visible = positionals.includes('publish')
     const requestAdmin = positionals.includes('approve')
+    const defaultAppInput = { description: {}, visible } as EAppInput
 
     const tasks = new Listr<Ctx>(
         [
-            // {
-            //     title: 'Checking existing project',
-            //     async task(ctx, task) {
-            //         ctx.project = new Project()
-            //     }
-            // },
+
             {
                 title: 'Authenticating',
                 async task(ctx, task) {
                     if (ctx.project.token) {
-                        task.skip("You're in.")
-                        return
+                        task.output = 'Retrieving your profile'
+                        const client = getClient(ctx.project.token)
+                        const { error, data } = await getMe(client)
+
+                        if (data && !error) {
+                            task.skip("You're in.")
+                            return
+                        }
                     }
 
                     return task.newListr([
@@ -222,10 +224,10 @@ const entry = async () => {
 
                 async task(ctx, task) {
                     task.title = `${ctx.project.appId ? 'Submitting App Update' : 'Creating App'}: ${ctx.appInput.name}`
-                    if (!isVisible) {
+                    if (!visible) {
                         task.output = `App will not be accessible publicly, set it public with "arible publish"`
                     }
-                    ctx.appInput.visible = isVisible
+                    ctx.appInput.visible = visible
                     const client = getClient(ctx.project.token)
                     task.output = 'Submitting App'
                     const { data: app, error } = await createApp(client, ctx.appInput, ctx.project.appId)
@@ -240,7 +242,7 @@ const entry = async () => {
         {
             concurrent: false, ctx: {
                 project: new Project(),
-                appInput: DEFAULT_APP_INPUT
+                appInput: defaultAppInput
             }
         }
     )
@@ -249,6 +251,5 @@ const entry = async () => {
     console.log(`Your app url: ${ctx.appUrl}`)
 }
 
-const DEFAULT_APP_INPUT = { description: {} } as any
 
 await entry()
