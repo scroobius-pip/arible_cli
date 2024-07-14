@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import 'dotenv/config'
 import { createApp, createEmailToken, EAppInput, getMe, responseCallback, verifyEmailToken } from './api';
 import { delay, Listr, ListrDefaultRendererLogLevels } from 'listr2';
