@@ -88,7 +88,8 @@ export const handleResponse = async <T>(response: Response, isJson = true): Prom
                 case 404:
                     return { error: ErrorType.NotFound }
                 default:
-                    return { error: ErrorType.Unknown }
+                    //@ts-ignore
+                    return { error: `Status Code: ${response.status}, ${await response.text()}` }
             }
         }
 
@@ -105,11 +106,11 @@ export const handleResponse = async <T>(response: Response, isJson = true): Prom
             case 'INVALID_TOKEN':
                 return { error: ErrorType.Auth };
             default:
-                return { error: ErrorType.Unknown };
+                return { error: data.error };
         }
     } catch (error) {
         return {
-            error: ErrorType.Unknown
+            error: error
         }
     }
 }

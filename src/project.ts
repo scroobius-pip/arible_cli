@@ -1,9 +1,5 @@
 import ConfigStore from 'conf';
 import { jwtDecode } from 'jwt-decode';
-import { showLoginPrompt } from '.';
-import { createApp, EAppInput, ErrorType } from './api';
-import { getClient } from './api/client';
-import { getAppInput } from './app';
 
 interface Store {
     token?: string;
@@ -46,6 +42,7 @@ export class Project {
     public get appId(): string | undefined {
         return this.store.get('appId');
     }
+
 
 }
 export const jwtValid = (token: string): boolean => {

@@ -1,5 +1,5 @@
 # APP_NAME
-4K AI Photographer
+Demo Name
 # COST DOLLARS
 2.2
 # SHORT_DESCRIPTION

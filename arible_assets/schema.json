@@ -1,0 +1,78 @@
+{
+    "title": "User Registration",
+    "description": "A simple form for user registration",
+    "fields": [
+        {
+            "name": "username",
+            "title": "Username",
+            "type": "Text",
+            "description": "Enter your username",
+            "depends": {
+                "allOf": [
+                    {
+                        "falsy": "{{subscribe}}"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "username_preview",
+            "type": "Text",
+            "value": "arible.co/{{username}}",
+            "title": "Username Preview"
+        },
+        {
+            "name": "subscribe",
+            "title": "Subscribe To Newsletter",
+            "type": "Switch",
+            "description": "Do you want to receive out newsletter?",
+            "defaultValue": false
+        },
+        {
+            "name": "email",
+            "title": "Email",
+            "description": "Email For Newsletter",
+            "type": "Text",
+            "depends": "{{subscribe}}",
+            "validation": {
+                "allOf": [
+                    {
+                        "pattern": "^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$",
+                        "message": "Enter a valid email address"
+                    }
+                ]
+            }
+        },
+        {
+            "name": "profile_picture_upload",
+            "title": "Profile Picture",
+            "description": "Upload a Profile Picture",
+            "type": "File",
+            "mimeTypes": [
+                "image/jpeg",
+                "image/png"
+            ],
+            "validation": {
+                "allOf": [
+                    {
+                        "max": 1
+                    }
+                ]
+            }
+        },
+        {
+            "name": "profile_picture_face_crop",
+            "title": "Preview",
+            "type": "Image",
+            "value": "{{profile_picture_upload}}?func=face&face_margin={{face_margin}}"
+        },
+        {
+            "name": "face_margin",
+            "title": "Face Margin",
+            "type": "Number",
+            "slider_step": 10,
+            "defaultValue": 100,
+            "depends": "{{profile_picture_upload}}"
+        }
+    ]
+}

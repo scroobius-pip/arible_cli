@@ -27,7 +27,7 @@ export const getClient = (token?: string): Client => {
             }
         } catch (error) {
             return {
-                error: ErrorType.Unknown
+                error: error
             }
         }
     }
