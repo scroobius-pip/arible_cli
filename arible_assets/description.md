@@ -1,6 +1,6 @@
 # APP_NAME
 Demo Name
-# COST DOLLARS
+# COST_DOLLARS
 2.2
 # SHORT_DESCRIPTION
 AI Generated Portraits
