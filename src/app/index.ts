@@ -13,8 +13,8 @@ export const getAppInput = async (app_dir_path: string, client: Client): Promise
     //GIVE FEEDBACK THAT AUTHORIZATION AND/OR ALLOWED DOMAINS WHERE FOUND
 
     const DESCRIPTION_MARKDOWN_PATH = path.join(app_dir_path, 'description.md')
-    const SCHEMA_PATH = path.join(app_dir_path, 'schema.json')
-    
+    const SCHEMA_PATH = path.join(app_dir_path, 'abl.json')
+
     const jsonSchema = JSON.parse(readFileSync(SCHEMA_PATH, {
         encoding: 'utf8',
         flag: 'r'
