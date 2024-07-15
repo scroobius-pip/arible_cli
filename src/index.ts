@@ -145,7 +145,7 @@ const entry = async () => {
                             {
                                 title: 'Parsing schema.json',
                                 async task(ctx, task) {
-                                    const SCHEMA_PATH = path.join(DEFAULT_APP_DIR_PATH, 'schema.json')
+                                    const SCHEMA_PATH = path.join(DEFAULT_APP_DIR_PATH, 'abl.json')
                                     const jsonContent = await readFile(SCHEMA_PATH, {
                                         encoding: 'utf8',
                                         flag: 'r'
