@@ -127,7 +127,7 @@ const entry = async () => {
                                 title: 'Reading description.md',
                                 async task(ctx, task) {
                                     const DESCRIPTION_MARKDOWN_PATH = path.join(DEFAULT_APP_DIR_PATH, 'description.md')
-                                    const { shortDescription, description, title, dollarCost } = getDescriptionTexts(DESCRIPTION_MARKDOWN_PATH)
+                                    const { shortDescription, description, title, dollarCost, tags } = getDescriptionTexts(DESCRIPTION_MARKDOWN_PATH)
                                     task.output = `${title} - Great Name!`
                                     ctx.appInput = {
                                         ...ctx.appInput,
@@ -138,7 +138,9 @@ const entry = async () => {
                                             short_description: shortDescription,
                                             title
                                         },
-                                        dollar_cost: dollarCost
+
+                                        dollar_cost: dollarCost,
+                                        tags
                                     }
                                 }
                             },

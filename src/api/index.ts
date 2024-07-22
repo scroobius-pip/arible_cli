@@ -212,6 +212,7 @@ export interface EAppInput {
     authorization?: string
     allowed_domain?: string
     visible: boolean
+    tags?: number[]
 }
 
 export function createApp(client: Client, input: EAppInput, appId?: string) {

@@ -4,6 +4,8 @@ Demo Name
 2.2
 # SHORT_DESCRIPTION
 AI Generated Portraits
+# TAGS
+3, 4
 # DESCRIPTION
 This is some basic, sample markdown.
 

@@ -5,6 +5,7 @@ interface Texts {
     description: string
     title: string
     dollarCost?: number
+    tags?: number[]
 }
 
 export const getDescriptionTexts = (file_path: string): Texts => {
@@ -44,6 +45,11 @@ export const getDescriptionTexts = (file_path: string): Texts => {
                     ...texts,
                     description: currentSection.body
                 }
+            case 'tags':
+                return {
+                    ...texts,
+                    tags: currentSection.body.split(',').map(parseInt).filter(Boolean)
+                }
             default:
                 // Assume it's part of description, also use the heading
                 return {
@@ -55,5 +61,6 @@ export const getDescriptionTexts = (file_path: string): Texts => {
         shortDescription: '',
         description: '',
         title: '',
+
     })
 }
