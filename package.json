@@ -1,6 +1,6 @@
 {
   "name": "arible",
-  "version": "1.0.5",
+  "version": "1.1.0",
   "description": "CLI For Creating, Deploying and Managing Arible Projects",
   "source": "src/index.ts",
   "main": "bin/index.js",
