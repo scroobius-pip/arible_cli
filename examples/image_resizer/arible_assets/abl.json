@@ -1,0 +1,67 @@
+{
+    "title": "Image Resizer",
+    "description": "A simple and instant image resizing tool",
+    "fields": [
+        {
+            "name": "image",
+            "title": "Original Image",
+            "description": "Upload an Image",
+            "type": "File",
+            "mimeTypes": [
+                "image/*"
+            ],
+            "validation": {
+                "allOf": [
+                    {
+                        "max": 1
+                    }
+                ]
+            }
+        },
+        {
+            "name": "width",
+            "type": "Text",
+            "title": "Width"
+        },
+        {
+            "name": "height",
+            "type": "Text",
+            "title": "Height"
+        },
+        {
+            "name": "lock_aspect_ratio",
+            "title": "Lock Aspect Ratio",
+            "type": "Switch"
+        },
+        {
+            "name": "background_fill",
+            "type": "Text",
+            "title": "Background Fill",
+            "description": "Color Hexadecimal",
+            "depends": "{{lock_aspect_ratio}}"
+        },
+        {
+            "name": "image_resized",
+            "title": "Resized Image",
+            "type": "Image",
+            "value": "{{image}}?width={{width}}&height={{height}}&bg_color={{background_fill}}",
+            "depends": "{{image}}{{width}}{{height}}{{background_fill}}"
+        },
+        {
+            "name": "image_resized_no_bg",
+            "title": "Resized Image",
+            "type": "Image",
+            "value": "{{image}}?width={{width}}&height={{height}}",
+            "depends": {
+                "allOf": [
+                    {
+                        "truthy": "{{image}}{{width}}{{height}}"
+                    },
+                    {
+                        "falsy": "{{background_fill}}"
+                    }
+                ]
+            }
+        }
+    ]
+}
