@@ -4,7 +4,7 @@ import fetch from 'node-fetch-native';
 
 export const uploadFiles = async (filePaths: string[], client: Client): Promise<string[]> => {
     const exts = filePaths.filter(Boolean).map(paths => paths.split('.').pop() ?? '').filter(Boolean)
-    const { data: presignedUrls, error } = (await getUploadUrls(client, exts))
+    const { data: presignedUrls, error } = (await getUploadUrls(client, exts, true))
 
     if (!presignedUrls || error) {
         const errorMessage = `Failed To Get Upload URLs: ${error}`
